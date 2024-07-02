@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Monitor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .up {
+            color: green;
+        }
+        .down {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Website Monitor</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Website URL</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Last Down Time</th>
+                <th>Last Alert Sent Time</th>
+            </tr>
+        </thead>
+        <tbody id="websiteTableBody">
+            <!-- Dynamic content will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        function fetchWebsiteStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('websiteTableBody');
+                    tableBody.innerHTML = ''; // Clear previous data
+
+                    Object.keys(data).forEach(url => {
+                        const website = data[url];
+                        const row = document.createElement('tr');
+
+                        const urlCell = document.createElement('td');
+                        urlCell.textContent = url;
+                        row.appendChild(urlCell);
+
+                        const titleCell = document.createElement('td');
+                        titleCell.textContent = website.status === 'up' ? website.title : ''; // Display title only if status is 'up'
+                        row.appendChild(titleCell);
+
+                        const statusCell = document.createElement('td');
+                        statusCell.textContent = website.status === 'up' ? 'Website is UP' : 'Website is DOWN';
+                        statusCell.className = website.status === 'up' ? 'up' : 'down';
+                        row.appendChild(statusCell);
+
+                        const lastDownTimeCell = document.createElement('td');
+                        lastDownTimeCell.textContent = website.last_down_time || '-';
+                        row.appendChild(lastDownTimeCell);
+
+                        const lastAlertSentTimeCell = document.createElement('td');
+                        lastAlertSentTimeCell.textContent = website.last_alert_sent_time || '-';
+                        row.appendChild(lastAlertSentTimeCell);
+
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching website status:', error);
+                });
+        }
+
+        setInterval(fetchWebsiteStatus, 2000); // Refresh every 2 seconds
+        window.onload = fetchWebsiteStatus; // Fetch status on page load
+    </script>
+</body>
+</html>
